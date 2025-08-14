@@ -1,5 +1,4 @@
-name: Deploy branch to Sandbox
-run-name: Deploy branch ${{ github.ref_name }} to Sandbox
+name: Deploy MuleSoft API
 
 on:
   workflow_dispatch:
