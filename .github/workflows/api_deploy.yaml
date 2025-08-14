@@ -7,6 +7,23 @@ on:
         description: "Environnement de déploiement (sandbox, dev, prd)"
         required: true
         type: string
+      branch:
+        description: "Nom de la branche à déployer"
+        required: false
+        type: string
+      workers:
+        description: "Nombre de replicas"
+        required: false
+        type: number
+      vcores:
+        description: "Nombre de vcores"
+        required: false
+        type: number
+      app_name:
+        description: "Nom de l'API"
+        required: false
+        type: string
+      
 
 jobs:
   deploy_api:
