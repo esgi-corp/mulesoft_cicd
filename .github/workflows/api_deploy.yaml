@@ -14,11 +14,11 @@ on:
       workers:
         description: "Nombre de replicas"
         required: false
-        type: number
+        type: string
       vcores:
         description: "Nombre de vcores"
         required: false
-        type: number
+        type: string
       app_name:
         description: "Nom de l'API"
         required: false
