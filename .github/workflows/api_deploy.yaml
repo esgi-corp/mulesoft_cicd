@@ -88,7 +88,7 @@ jobs:
           mvn deploy --settings .maven/settings.xml -DskipTests -DmuleDeploy \
           -Dapp.name=${APP_NAME} \
           -Denv=${ENV} \
-          -Dtarget="Cloudhub-EU-Central-1" \
+          -Dtarget=${TARGET} \
           -Dclient.id="${CONNECTEDAPP_CLIENT_ID}" \
           -Dclient.secret="${CONNECTEDAPP_CLIENT_SECRET}" \
           -DanypointClientId=${ANYPOINT_CLIENT_ID} \
