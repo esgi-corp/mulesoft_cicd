@@ -35,7 +35,7 @@ jobs:
       CONNECTEDAPP_CLIENT_ID: ${{ secrets.CONNECTEDAPP_CLIENT_ID }}
       CONNECTEDAPP_CLIENT_SECRET: ${{ secrets.CONNECTEDAPP_CLIENT_SECRET }}
       TARGET: ${{ secrets.TARGET }}
-      GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
+      GIT_ORG: ${{ secrets.GIT_ORG }}
       PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
       APP_NAME: ${{ inputs.APP_NAME }}
       WORKERS: ${{ inputs.WORKERS }}
@@ -68,10 +68,10 @@ jobs:
         run: |
           echo "📦 Publishing to Github..."
             mvn clean deploy --settings .maven/settings.xml -DskipTests \
-              -DaltDeploymentRepository=github-mule-assets::default::https://maven.pkg.github.com/Nassim952/mule-assets \
+              -DaltDeploymentRepository=github-mule-assets::default::https://maven.pkg.github.com/esgi-corp/mule-assets \
               -Dclient.id="$CONNECTEDAPP_CLIENT_ID" \
               -Dclient.secret="$CONNECTEDAPP_CLIENT_SECRET" \
-              -Dgit.username=${GIT_USERNAME} \
+              -Dgit.username=${GIT_ORG} \
               -Dpat.token=${PAT_TOKEN}
 
       - name: Publish asset to Exchange
@@ -81,7 +81,7 @@ jobs:
             mvn clean deploy --settings .maven/settings.xml -DskipTests \
               -Dclient.id="$CONNECTEDAPP_CLIENT_ID" \
               -Dclient.secret="$CONNECTEDAPP_CLIENT_SECRET" \
-              -Dgit.username=${GIT_USERNAME} \
+              -Dgit.username=${GIT_ORG} \
               -Dpat.token=${PAT_TOKEN}
 
       - name: Deploy to CloudHub 2.0
@@ -95,7 +95,7 @@ jobs:
           -DanypointClientId=${ANYPOINT_CLIENT_ID} \
           -DanypointClientSecret=${ANYPOINT_CLIENT_SECRET} \
           -Dmule.key=${MULE_KEY} \
-          -Dgit.username=${GIT_USERNAME} \
+          -Dgit.username=${GIT_ORG} \
           -Dworkers=${WORKERS} \
           -Dvirtual.cores=${VCORES} \
           -Dpat.token=${PAT_TOKEN}
