@@ -140,26 +140,21 @@ jobs:
             git push origin $TAG_NAME
           fi
 
-      - name: Merge deployed tag into main
+      - name: Update branch main to deployed tag
         if: inputs.env == 'prd'
         run: |
-          echo "🔀 Merging tag ${{ github.ref_name }} into main..."
+          echo "🔀 Updating branch main to tag ${{ github.ref_name }}..."
 
-          # Configure Git identity 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Récupère les dernières branches et tags du remote
+          # Récupère la branche main et le tag
           git fetch origin main --depth=1
           git fetch origin "refs/tags/${{ github.ref_name }}:refs/tags/${{ github.ref_name }}"
 
-          # Crée une nouvelle branche temporaire depuis main
-          git checkout -b merge-tag-into-main origin/main
+          # Bascule main sur le commit du tag
+          git checkout main
+          git reset --hard "${{ github.ref_name }}"
 
-          # Merge du tag (en tant que commit standard)
-          git merge "${{ github.ref_name }}" --allow-unrelated-histories -m "🔀 Merge tag ${{ github.ref_name }} into main after production deployment"
-
-          # Push vers la branche main
-          git push origin HEAD:main
-
-          echo "✅ Tag ${{ github.ref_name }} has been merged into main."
+          # Met à jour main côté remote
+          git push origin main --force
