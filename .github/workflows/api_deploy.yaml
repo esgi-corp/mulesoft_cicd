@@ -85,7 +85,7 @@ jobs:
               -Dgit.username=${GIT_ORG} \
               -Dpat.token=${PAT_TOKEN}
 
-      - name: Select mule key based on env deploymeny
+      - name: Select mule key based on env deployment
         run: |
           if [ "${ENV}" = "prd" ]; then
             echo "MULE_KEY=${PRD_MULE_KEY}" >> $GITHUB_ENV
