@@ -64,6 +64,10 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Set up vars API name
+        run: |
+          echo "API_NAME=${APP_NAME}-${ENV}" >> $GITHUB_ENV
+
       - name: Publish asset to Github
         if: inputs.ENV == 'sandbox'
         run: |
@@ -98,7 +102,7 @@ jobs:
       - name: Deploy to CloudHub 2.0
         run: |
           mvn deploy --settings .maven/settings.xml -DskipTests -DmuleDeploy \
-          -Dapp.name=${APP_NAME} \
+          -Dapp.name=${API_NAME} \
           -Denv=${ENV} \
           -Dtarget=${TARGET} \
           -Dclient.id="${CONNECTEDAPP_CLIENT_ID}" \
@@ -124,7 +128,7 @@ jobs:
       - name: Create and push tag
         if: inputs.env == 'sandbox'
         run: |
-          TAG_NAME="eapi-weather-app-${VERSION}"
+          TAG_NAME="${APP_NAME}-${VERSION}"
 
           echo "🔍 Checking if tag $TAG_NAME already exists on remote..."
 
