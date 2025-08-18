@@ -83,6 +83,12 @@ jobs:
           else
             echo "⚠️ Warning: ${ENV}-secure-properties.yaml not found"
           fi
+      
+      - name: Verify injected properties
+        run: |
+          echo "🔍 Checking injected properties..."
+          ls -R src/main/resources/props
+          exit 1
 
       - name: Cache dependencies
         uses: actions/cache@v4
