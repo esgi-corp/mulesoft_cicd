@@ -37,6 +37,7 @@ jobs:
       GIT_ORG: ${{ secrets.GIT_ORG }}
       PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
       APP_NAME: ${{ inputs.APP_NAME }}
+      REPO_PROPS_NAME: ${{ inputs.REPO_PROPS_NAME }}
       WORKERS: ${{ inputs.WORKERS }}
       VCORES: ${{ inputs.VCORES }}
       SANDBOX_MULE_KEY: ${{ secrets.SANDBOX_MULE_KEY}}
@@ -50,6 +51,20 @@ jobs:
         with:
           ref: ${{ inputs.BRANCH }}
           token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Checkout Properties repository
+        uses: actions/checkout@v4
+        with:
+          repository: esgi-corp/${{ inputs.REPO_PROPS_NAME }}
+          path: properties-repo
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Inject properties into API package
+        run: |
+          echo "📥 Injecting properties for environment: ${ENV}"
+          mkdir -p src/main/resources/props
+          cp -r properties-repo/${ENV}/* src/main/resources/props/
+          echo "✅ Properties for ${ENV} injected into API build context."
 
       - name: Cache dependencies
         uses: actions/cache@v4
