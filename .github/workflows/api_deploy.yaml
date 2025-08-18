@@ -64,12 +64,25 @@ jobs:
           token: ${{ secrets.PAT_TOKEN }}
 
       - name: Inject properties into API package
-        if: inputs.ENV == 'dev' || inputs.ENV == 'prd'
         run: |
           echo "📥 Injecting properties for environment: ${ENV}"
           mkdir -p src/main/resources/props
-          cp -r properties-repo/${ENV}/* src/main/resources/props/
-          echo "✅ Properties for ${ENV} injected into API build context."
+
+          # Fichier standard
+          if [ -f "properties-repo/${ENV}-properties.yaml" ]; then
+            echo "➡️ Copying ${ENV}-properties.yaml"
+            cp "properties-repo/${ENV}-properties.yaml" src/main/resources/props/
+          else
+            echo "⚠️ Warning: ${ENV}-properties.yaml not found"
+          fi
+
+          # Fichier secure
+          if [ -f "properties-repo/${ENV}-secure-properties.yaml" ]; then
+            echo "➡️ Copying ${ENV}-secure-properties.yaml"
+            cp "properties-repo/${ENV}-secure-properties.yaml" src/main/resources/props/
+          else
+            echo "⚠️ Warning: ${ENV}-secure-properties.yaml not found"
+          fi
 
       - name: Cache dependencies
         uses: actions/cache@v4
