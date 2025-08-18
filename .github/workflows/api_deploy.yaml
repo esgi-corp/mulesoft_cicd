@@ -37,7 +37,6 @@ jobs:
       GIT_ORG: ${{ secrets.GIT_ORG }}
       PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
       APP_NAME: ${{ inputs.APP_NAME }}
-      REPO_PROPS_NAME: ${{ inputs.REPO_PROPS_NAME }}
       WORKERS: ${{ inputs.WORKERS }}
       VCORES: ${{ inputs.VCORES }}
       SANDBOX_MULE_KEY: ${{ secrets.SANDBOX_MULE_KEY}}
