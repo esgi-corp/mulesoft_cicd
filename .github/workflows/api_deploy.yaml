@@ -142,7 +142,6 @@ jobs:
           mvn clean package --settings .maven/settings.xml -DskipTests
           echo "🔍 Checking packaged properties..."
           ls -R target/classes/props || true  # Vérification avant deploy
-          exit 1
           mvn clean deploy --settings .maven/settings.xml -DmuleDeploy \
           -Dapp.name=${API_NAME} \
           -Denv=${ENV} \
