@@ -84,6 +84,10 @@ jobs:
             echo "⚠️ Warning: ${ENV}-secure-properties.yaml not found"
           fi
 
+          echo "🔍 Checking injected properties..."
+          ls -l src/main/resources/props
+          exit 1
+
       - name: Cache dependencies
         uses: actions/cache@v4
         with:
@@ -135,6 +139,7 @@ jobs:
       - name: Deploy to CloudHub 2.0
         run: |
           mvn clean package --settings .maven/settings.xml -DskipTests
+          ls -R target/classes/props || true  # Vérification avant deploy
           mvn clean deploy --settings .maven/settings.xml -DmuleDeploy \
           -Dapp.name=${API_NAME} \
           -Denv=${ENV} \
