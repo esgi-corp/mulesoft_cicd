@@ -135,6 +135,21 @@ jobs:
             echo "MULE_KEY=${SANDBOX_MULE_KEY}" >> $GITHUB_ENV
           fi
 
+      - name: Build and Package API
+        run: |
+          echo "🚀 Packaging Mule application..."
+          mvn clean package --settings .maven/settings.xml -DskipTests
+
+          echo "🔍 Checking injected props in target/classes..."
+          ls -R target/classes/props || echo "❌ props folder missing in target/classes"
+
+          echo "📦 Checking contents of final JAR..."
+          JAR_FILE=$(ls target/*.jar | head -n 1)
+          echo "➡️ Found JAR: $JAR_FILE"
+          jar tf $JAR_FILE | grep props || echo "❌ props not found in JAR"
+          exit 1
+
+
       - name: Deploy to CloudHub 2.0
         run: |
           echo "🔍 Checking injected properties..."
