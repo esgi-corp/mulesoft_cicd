@@ -147,6 +147,15 @@ jobs:
           JAR_FILE=$(ls target/*.jar | head -n 1)
           echo "➡️ Found JAR: $JAR_FILE"
           jar tf $JAR_FILE | grep props || echo "❌ props not found in JAR"
+      
+      - name: Inspect packaged JAR contents
+        run: |
+          echo "📦 Listing JAR contents (props only)..."
+          JAR_FILE=$(ls target/*-mule-application.jar | head -n 1)
+          echo "➡️ Found JAR: $JAR_FILE"
+          jar tf "$JAR_FILE" | grep "props/" || echo "⚠️ No props found in JAR!"
+          exit 1
+
 
       - name: Deploy to CloudHub 2.0
         run: |
