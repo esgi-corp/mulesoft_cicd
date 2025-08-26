@@ -147,8 +147,6 @@ jobs:
           JAR_FILE=$(ls target/*.jar | head -n 1)
           echo "➡️ Found JAR: $JAR_FILE"
           jar tf $JAR_FILE | grep props || echo "❌ props not found in JAR"
-          exit 1
-
 
       - name: Deploy to CloudHub 2.0
         run: |
