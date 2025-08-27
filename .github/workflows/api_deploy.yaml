@@ -109,6 +109,10 @@ jobs:
           echo "🔍 Checking injected properties..."
           ls -l src/main/resources/props
 
+          echo "🧹 Removing properties-repo before build..."
+          rm -rf properties-repo
+          ls -l
+
       - name: Show workspace after injection
         run: |
           echo "📂 Final workspace state:"
