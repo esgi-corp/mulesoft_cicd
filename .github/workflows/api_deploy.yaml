@@ -56,40 +56,23 @@ jobs:
           token: ${{ secrets.PAT_TOKEN }}
 
       - name: Checkout Properties repository
-        if: inputs.ENV == 'dev' || inputs.ENV == 'prd'
         uses: actions/checkout@v4
         with:
           repository: esgi-corp/${{ inputs.REPO_PROPS_NAME }}
           path: properties-repo
           token: ${{ secrets.PAT_TOKEN }}
 
-      - name: Inject properties into API package
-        if: inputs.ENV == 'dev' || inputs.ENV == 'prd'
+      - name: Inject all properties into API package
         run: |
-          echo "📥 Injecting properties for environment: ${ENV}"
+          echo "📥 Injecting ALL properties into API package"
           mkdir -p src/main/resources/props
 
-          # Fichier standard
-          if [ -f "properties-repo/${ENV}-properties.yaml" ]; then
-            echo "➡️ Copying ${ENV}-properties.yaml"
-            cp "properties-repo/${ENV}-properties.yaml" src/main/resources/props/
-          else
-            echo "⚠️ Warning: ${ENV}-properties.yaml not found"
-          fi
-
-          # Fichier secure
-          if [ -f "properties-repo/${ENV}-secure-properties.yaml" ]; then
-            echo "➡️ Copying ${ENV}-secure-properties.yaml"
-            cp "properties-repo/${ENV}-secure-properties.yaml" src/main/resources/props/
-          else
-            echo "⚠️ Warning: ${ENV}-secure-properties.yaml not found"
-          fi
+          # Copier tous les fichiers *-properties.yaml et *-secure-properties.yaml
+          cp -v properties-repo/*-properties.yaml src/main/resources/props/ || true
+          cp -v properties-repo/*-secure-properties.yaml src/main/resources/props/ || true
 
           echo "🔍 Checking injected properties..."
           ls -l src/main/resources/props
-
-          echo "🧹 Removing folder properties-repo before build..."
-          rm -rf properties-repo
 
       - name: Cache dependencies
         uses: actions/cache@v4
