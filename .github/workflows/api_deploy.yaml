@@ -55,17 +55,6 @@ jobs:
           ref: ${{ inputs.BRANCH }}
           token: ${{ secrets.PAT_TOKEN }}
 
-      - name: Show workspace right after code checkout
-        run: |
-          echo "📂 Workspace location: $GITHUB_WORKSPACE"
-          ls -alR $GITHUB_WORKSPACE | head -n 200
-          echo "🔎 Content of props files:"
-          for file in $GITHUB_WORKSPACE/src/main/resources/props/*; do
-            echo "----- $file -----"
-            cat "$file"
-            echo ""
-          done
-
       - name: Checkout Properties repository
         if: inputs.ENV == 'dev' || inputs.ENV == 'prd'
         uses: actions/checkout@v4
@@ -73,17 +62,6 @@ jobs:
           repository: esgi-corp/${{ inputs.REPO_PROPS_NAME }}
           path: properties-repo
           token: ${{ secrets.PAT_TOKEN }}
-
-      - name: Show workspace after properties checkout
-        run: |
-          echo "📂 Workspace after properties checkout:"
-          ls -alR $GITHUB_WORKSPACE | head -n 200
-          echo "🔎 Content of props files:"
-          for file in $GITHUB_WORKSPACE/src/main/resources/props/*; do
-            echo "----- $file -----"
-            cat "$file"
-            echo ""
-          done
 
       - name: Inject properties into API package
         run: |
@@ -109,21 +87,8 @@ jobs:
           echo "🔍 Checking injected properties..."
           ls -l src/main/resources/props
 
-          echo "🧹 Removing properties-repo before build..."
+          echo "🧹 Removing folder properties-repo before build..."
           rm -rf properties-repo
-          ls -l
-
-      - name: Show workspace after injection
-        run: |
-          echo "📂 Final workspace state:"
-          ls -alR $GITHUB_WORKSPACE | head -n 200
-          echo "🔎 Content of props files:"
-          for file in $GITHUB_WORKSPACE/src/main/resources/props/*; do
-            echo "----- $file -----"
-            cat "$file"
-            echo ""
-          done
-          exit 1
 
       - name: Cache dependencies
         uses: actions/cache@v4
