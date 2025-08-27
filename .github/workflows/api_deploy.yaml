@@ -55,6 +55,11 @@ jobs:
           ref: ${{ inputs.BRANCH }}
           token: ${{ secrets.PAT_TOKEN }}
 
+      - name: Show workspace right after code checkout
+        run: |
+          echo "📂 Workspace location: $GITHUB_WORKSPACE"
+          ls -alR $GITHUB_WORKSPACE | head -n 200
+
       - name: Checkout Properties repository
         if: inputs.ENV == 'dev' || inputs.ENV == 'prd'
         uses: actions/checkout@v4
@@ -62,6 +67,11 @@ jobs:
           repository: esgi-corp/${{ inputs.REPO_PROPS_NAME }}
           path: properties-repo
           token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Show workspace after properties checkout
+        run: |
+          echo "📂 Workspace after properties checkout:"
+          ls -alR $GITHUB_WORKSPACE | head -n 200
 
       - name: Inject properties into API package
         run: |
@@ -86,6 +96,12 @@ jobs:
 
           echo "🔍 Checking injected properties..."
           ls -l src/main/resources/props
+
+      - name: Show workspace after injection
+        run: |
+          echo "📂 Final workspace state:"
+          ls -alR $GITHUB_WORKSPACE | head -n 200
+          exit 1
 
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -134,28 +150,6 @@ jobs:
           else
             echo "MULE_KEY=${SANDBOX_MULE_KEY}" >> $GITHUB_ENV
           fi
-
-      - name: Build and Package API
-        run: |
-          echo "🚀 Packaging Mule application..."
-          mvn clean package --settings .maven/settings.xml -DskipTests
-
-          echo "🔍 Checking injected props in target/classes..."
-          ls -R target/classes/props || echo "❌ props folder missing in target/classes"
-
-          echo "📦 Checking contents of final JAR..."
-          JAR_FILE=$(ls target/*.jar | head -n 1)
-          echo "➡️ Found JAR: $JAR_FILE"
-          jar tf $JAR_FILE | grep props || echo "❌ props not found in JAR"
-      
-      - name: Inspect packaged JAR contents
-        run: |
-          echo "📦 Listing JAR contents (props only)..."
-          JAR_FILE=$(ls target/*-mule-application.jar | head -n 1)
-          echo "➡️ Found JAR: $JAR_FILE"
-          jar tf "$JAR_FILE" | grep "props/" || echo "⚠️ No props found in JAR!"
-          exit 1
-
 
       - name: Deploy to CloudHub 2.0
         run: |
