@@ -64,6 +64,7 @@ jobs:
           token: ${{ secrets.PAT_TOKEN }}
 
       - name: Inject properties into API package
+        if: inputs.ENV == 'dev' || inputs.ENV == 'prd'
         run: |
           echo "📥 Injecting properties for environment: ${ENV}"
           mkdir -p src/main/resources/props
