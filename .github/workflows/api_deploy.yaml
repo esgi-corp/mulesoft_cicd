@@ -59,6 +59,12 @@ jobs:
         run: |
           echo "📂 Workspace location: $GITHUB_WORKSPACE"
           ls -alR $GITHUB_WORKSPACE | head -n 200
+          echo "🔎 Content of props files:"
+          for file in $GITHUB_WORKSPACE/src/main/resources/props/*; do
+            echo "----- $file -----"
+            cat "$file"
+            echo ""
+          done
 
       - name: Checkout Properties repository
         if: inputs.ENV == 'dev' || inputs.ENV == 'prd'
@@ -72,6 +78,12 @@ jobs:
         run: |
           echo "📂 Workspace after properties checkout:"
           ls -alR $GITHUB_WORKSPACE | head -n 200
+          echo "🔎 Content of props files:"
+          for file in $GITHUB_WORKSPACE/src/main/resources/props/*; do
+            echo "----- $file -----"
+            cat "$file"
+            echo ""
+          done
 
       - name: Inject properties into API package
         run: |
@@ -101,6 +113,12 @@ jobs:
         run: |
           echo "📂 Final workspace state:"
           ls -alR $GITHUB_WORKSPACE | head -n 200
+          echo "🔎 Content of props files:"
+          for file in $GITHUB_WORKSPACE/src/main/resources/props/*; do
+            echo "----- $file -----"
+            cat "$file"
+            echo ""
+          done
           exit 1
 
       - name: Cache dependencies
