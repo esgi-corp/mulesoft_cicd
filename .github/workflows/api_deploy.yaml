@@ -71,6 +71,16 @@ jobs:
           cp -v properties-repo/*-properties.yaml src/main/resources/props/ || true
           cp -v properties-repo/*-secure-properties.yaml src/main/resources/props/ || true
 
+          echo "🔍 Checking injected properties..."
+          ls -l src/main/resources/props
+
+          echo "📄 Preview properties files content:"
+          for f in src/main/resources/props/*.yaml; do
+            echo "------ $f ------"
+            head -n 10 "$f"   # affiche les 10 premières lignes de chaque fichier
+          done
+          exit 1
+
       - name: Cache dependencies
         uses: actions/cache@v4
         with:
