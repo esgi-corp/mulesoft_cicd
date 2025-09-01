@@ -70,9 +70,9 @@ jobs:
           # Copier tous les fichiers *-properties.yaml et *-secure-properties.yaml
           cp -v properties-repo/*-properties.yaml src/main/resources/props/ || true
           cp -v properties-repo/*-secure-properties.yaml src/main/resources/props/ || true
-
-          echo "🔍 Checking injected properties..."
-          ls -l src/main/resources/props
+          
+          # Build Package API
+          mvn clean package --settings .maven/settings.xml -DskipTests          
 
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -124,7 +124,7 @@ jobs:
 
       - name: Deploy to CloudHub 2.0
         run: |
-          mvn clean deploy --settings .maven/settings.xml -DmuleDeploy \
+          mvn deploy --settings .maven/settings.xml -DmuleDeploy \
           -Dapp.name=${API_NAME} \
           -Denv=${ENV} \
           -Dtarget=${TARGET} \
