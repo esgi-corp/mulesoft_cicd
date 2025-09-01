@@ -79,7 +79,6 @@ jobs:
             echo "------ $f ------"
             head -n 10 "$f"   # affiche les 10 premières lignes de chaque fichier
           done
-          exit 1
 
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -133,6 +132,20 @@ jobs:
         run: |
           echo "🏗️ Building API Package..."
           mvn clean package --settings .maven/settings.xml -DskipTests
+
+      - name: Inspect packaged JAR
+        run: |
+          echo "🔎 Inspecting JAR content..."
+          unzip -l target/*.jar | grep props/
+
+      - name: Show properties inside JAR
+        run: |
+          jar xf target/*.jar props/
+          for f in props/*.yaml; do
+            echo "------ $f ------"
+            head -n 20 "$f"
+          done
+          exit 1
 
       - name: Deploy to CloudHub 2.0
         run: |
