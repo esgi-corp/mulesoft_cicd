@@ -71,8 +71,10 @@ jobs:
           cp -v properties-repo/*-properties.yaml src/main/resources/props/ || true
           cp -v properties-repo/*-secure-properties.yaml src/main/resources/props/ || true
           
-          # Build Package API
-          mvn clean package --settings .maven/settings.xml -DskipTests          
+      - name: Build Package API
+        run: |
+          echo "🏗️ Building API Package..."
+          mvn clean package --settings .maven/settings.xml -DskipTests
 
       - name: Cache dependencies
         uses: actions/cache@v4
