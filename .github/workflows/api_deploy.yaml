@@ -70,11 +70,6 @@ jobs:
           # Copier tous les fichiers *-properties.yaml et *-secure-properties.yaml
           cp -v properties-repo/*-properties.yaml src/main/resources/props/ || true
           cp -v properties-repo/*-secure-properties.yaml src/main/resources/props/ || true
-          
-      - name: Build Package API
-        run: |
-          echo "🏗️ Building API Package..."
-          mvn clean package --settings .maven/settings.xml -DskipTests
 
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -123,6 +118,11 @@ jobs:
           else
             echo "MULE_KEY=${SANDBOX_MULE_KEY}" >> $GITHUB_ENV
           fi
+
+      - name: Build Package API
+        run: |
+          echo "🏗️ Building API Package..."
+          mvn clean package --settings .maven/settings.xml -DskipTests
 
       - name: Deploy to CloudHub 2.0
         run: |
