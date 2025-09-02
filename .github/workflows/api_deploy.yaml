@@ -133,18 +133,18 @@ jobs:
       #     echo "🏗️ Building API Package..."
       #     mvn clean package --settings .maven/settings.xml -DskipTests
 
-      - name: Inspect packaged JAR
-        run: |
-          echo "🔎 Inspecting JAR content..."
-          unzip -l target/*.jar | grep props/
+      # - name: Inspect packaged JAR
+      #   run: |
+      #     echo "🔎 Inspecting JAR content..."
+      #     unzip -l target/*.jar | grep props/
 
-      - name: Show properties inside JAR
-        run: |
-          jar xf target/*.jar props/
-          for f in props/*.yaml; do
-            echo "------ $f ------"
-            head -n 20 "$f"
-          done
+      # - name: Show properties inside JAR
+      #   run: |
+      #     jar xf target/*.jar props/
+      #     for f in props/*.yaml; do
+      #       echo "------ $f ------"
+      #       head -n 20 "$f"
+      #     done
 
       - name: Extract version from pom.xml
         id: extract_version
