@@ -156,6 +156,7 @@ jobs:
         run: |
           mvn mule:deploy --settings .maven/settings.xml \
           -Dapp.name=${API_NAME} \
+          -Dapplication=target/sapi-weather-app-1.0.13-mule-application.jar \
           -Denv=${ENV} \
           -Dtarget=${TARGET} \
           -Dclient.id="${CONNECTEDAPP_CLIENT_ID}" \
@@ -167,7 +168,6 @@ jobs:
           -Dworkers=${WORKERS} \
           -Dvirtual.cores=${VCORES} \
           -Dpat.token=${PAT_TOKEN} \
-          -Dapplication=target/${APP_NAME}-${VERSION}-mule-application.jar
 
       - name: Check deployment success
         if: steps.deploy.outcome == 'success'
