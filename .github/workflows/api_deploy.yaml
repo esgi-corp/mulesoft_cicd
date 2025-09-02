@@ -154,7 +154,9 @@ jobs:
 
       - name: Deploy to CloudHub 2.0
         run: |
-          mvn clean package deploy --settings .maven/settings.xml -DmuleDeploy \
+          mvn clean package --settings .maven/settings.xml -DskipTests
+          mvn clean install
+          mvn deploy --settings .maven/settings.xml -DmuleDeploy \
           -Dapp.name=${API_NAME} \
           -Denv=${ENV} \
           -Dtarget=${TARGET} \
