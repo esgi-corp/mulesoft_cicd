@@ -145,7 +145,6 @@ jobs:
             echo "------ $f ------"
             head -n 20 "$f"
           done
-          exit 1
 
       - name: Deploy to CloudHub 2.0
         run: |
