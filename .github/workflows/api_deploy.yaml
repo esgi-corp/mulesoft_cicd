@@ -146,6 +146,12 @@ jobs:
             head -n 20 "$f"
           done
 
+      - name: Extract version from pom.xml
+        id: extract_version
+        run: |
+          VERSION=$(grep -m 1 '<version>' pom.xml | sed -E 's/.*<version>([^<]+)<\/version>.*/\1/')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
       - name: Deploy to CloudHub 2.0
         run: |
           mvn deploy --settings .maven/settings.xml -DmuleDeploy \
@@ -160,17 +166,12 @@ jobs:
           -Dgit.username=${GIT_ORG} \
           -Dworkers=${WORKERS} \
           -Dvirtual.cores=${VCORES} \
-          -Dpat.token=${PAT_TOKEN}
+          -Dpat.token=${PAT_TOKEN} \
+          -Dapplication=target/${APP_NAME}-${VERSION}-mule-application.jar
 
       - name: Check deployment success
         if: steps.deploy.outcome == 'success'
         run: echo "✅ Deployment succeeded."
-
-      - name: Extract version from pom.xml
-        id: extract_version
-        run: |
-          VERSION=$(grep -m 1 '<version>' pom.xml | sed -E 's/.*<version>([^<]+)<\/version>.*/\1/')
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Create and push tag
         if: inputs.env == 'sandbox'
