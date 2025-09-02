@@ -62,18 +62,6 @@ jobs:
           path: properties-repo
           token: ${{ secrets.PAT_TOKEN }}
 
-      - name: Inject all properties into API package
-        run: |
-          echo "📥 Injecting ALL properties into API package"
-          mkdir -p src/main/resources/props
-
-          # Copier tous les fichiers *-properties.yaml et *-secure-properties.yaml
-          cp -v properties-repo/*-properties.yaml src/main/resources/props/ || true
-          cp -v properties-repo/*-secure-properties.yaml src/main/resources/props/ || true
-
-          # Nettoyer le répertoire temporaire
-          rm -rf properties-repo
-
       - name: Cache dependencies
         uses: actions/cache@v4
         with:
@@ -91,7 +79,19 @@ jobs:
         run: |
           echo "API_NAME=${APP_NAME}-${ENV}" >> $GITHUB_ENV
 
+      - name: Inject all properties into API package
+        run: |
+          echo "📥 Injecting ALL properties into API package"
+          mkdir -p src/main/resources/props
+
+          cp -v properties-repo/*-properties.yaml src/main/resources/props/ || true
+          cp -v properties-repo/*-secure-properties.yaml src/main/resources/props/ || true
+
+          # Nettoyer le répertoire temporaire
+          rm -rf properties-repo
+
       - name: Publish asset to Github
+        if: inputs.ENV == 'sandbox'
         run: |
           echo "📦 Publishing to Github..."
             mvn clean deploy --settings .maven/settings.xml -DskipTests \
@@ -102,6 +102,7 @@ jobs:
               -Dpat.token=${PAT_TOKEN}
 
       - name: Publish asset to Exchange
+        if: inputs.ENV == 'sandbox'
         run: |
           echo "📦 Publishing to Exchange..."
             mvn clean deploy --settings .maven/settings.xml -DskipTests \
