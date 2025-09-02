@@ -154,10 +154,9 @@ jobs:
 
       - name: Deploy to CloudHub 2.0
         run: |
-          mvn mule:deploy --settings .maven/settings.xml \
-          -Dapp.name=${API_NAME} \
-          -Dapplication=target/sapi-weather-app-1.0.13-mule-application.jar \
+          mvn clean package deploy --settings .maven/settings.xml \
           -DmuleDeploy \
+          -Dapp.name=${API_NAME} \
           -Denv=${ENV} \
           -Dtarget=${TARGET} \
           -Dclient.id="${CONNECTEDAPP_CLIENT_ID}" \
@@ -168,7 +167,7 @@ jobs:
           -Dgit.username=${GIT_ORG} \
           -Dworkers=${WORKERS} \
           -Dvirtual.cores=${VCORES} \
-          -Dpat.token=${PAT_TOKEN} \
+          -Dpat.token=${PAT_TOKEN} 
 
       - name: Check deployment success
         if: steps.deploy.outcome == 'success'
