@@ -157,6 +157,7 @@ jobs:
           mvn mule:deploy --settings .maven/settings.xml \
           -Dapp.name=${API_NAME} \
           -Dapplication=target/sapi-weather-app-1.0.13-mule-application.jar \
+          -DmuleDeploy \
           -Denv=${ENV} \
           -Dtarget=${TARGET} \
           -Dclient.id="${CONNECTEDAPP_CLIENT_ID}" \
