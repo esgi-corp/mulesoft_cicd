@@ -71,14 +71,8 @@ jobs:
           cp -v properties-repo/*-properties.yaml src/main/resources/props/ || true
           cp -v properties-repo/*-secure-properties.yaml src/main/resources/props/ || true
 
-          echo "🔍 Checking injected properties..."
-          ls -l src/main/resources/props
-
-          echo "📄 Preview properties files content:"
-          for f in src/main/resources/props/*.yaml; do
-            echo "------ $f ------"
-            head -n 10 "$f"   # affiche les 10 premières lignes de chaque fichier
-          done
+          # Nettoyer le répertoire temporaire
+          rm -rf properties-repo
 
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -98,7 +92,6 @@ jobs:
           echo "API_NAME=${APP_NAME}-${ENV}" >> $GITHUB_ENV
 
       - name: Publish asset to Github
-        if: inputs.ENV == 'sandbox'
         run: |
           echo "📦 Publishing to Github..."
             mvn clean deploy --settings .maven/settings.xml -DskipTests \
@@ -109,7 +102,6 @@ jobs:
               -Dpat.token=${PAT_TOKEN}
 
       - name: Publish asset to Exchange
-        if: inputs.ENV == 'sandbox'
         run: |
           echo "📦 Publishing to Exchange..."
             mvn clean deploy --settings .maven/settings.xml -DskipTests \
@@ -128,34 +120,9 @@ jobs:
             echo "MULE_KEY=${SANDBOX_MULE_KEY}" >> $GITHUB_ENV
           fi
 
-      # - name: Build Package API
-      #   run: |
-      #     echo "🏗️ Building API Package..."
-      #     mvn clean package --settings .maven/settings.xml -DskipTests
-
-      # - name: Inspect packaged JAR
-      #   run: |
-      #     echo "🔎 Inspecting JAR content..."
-      #     unzip -l target/*.jar | grep props/
-
-      # - name: Show properties inside JAR
-      #   run: |
-      #     jar xf target/*.jar props/
-      #     for f in props/*.yaml; do
-      #       echo "------ $f ------"
-      #       head -n 20 "$f"
-      #     done
-
-      - name: Extract version from pom.xml
-        id: extract_version
-        run: |
-          VERSION=$(grep -m 1 '<version>' pom.xml | sed -E 's/.*<version>([^<]+)<\/version>.*/\1/')
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-
       - name: Deploy to CloudHub 2.0
         run: |
-          mvn clean package --settings .maven/settings.xml -DskipTests
-          mvn mule:deploy --settings .maven/settings.xml -DmuleDeploy \
+          mvn clean deploy --settings .maven/settings.xml -DmuleDeploy \
             -Dapp.name=${API_NAME} \
             -Denv=${ENV} \
             -Dtarget=${TARGET} \
@@ -170,6 +137,12 @@ jobs:
       - name: Check deployment success
         if: steps.deploy.outcome == 'success'
         run: echo "✅ Deployment succeeded."
+
+      - name: Extract version from pom.xml
+        id: extract_version
+        run: |
+          VERSION=$(grep -m 1 '<version>' pom.xml | sed -E 's/.*<version>([^<]+)<\/version>.*/\1/')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Create and push tag
         if: inputs.env == 'sandbox'
