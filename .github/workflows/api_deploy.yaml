@@ -128,23 +128,23 @@ jobs:
             echo "MULE_KEY=${SANDBOX_MULE_KEY}" >> $GITHUB_ENV
           fi
 
-      - name: Build Package API
-        run: |
-          echo "🏗️ Building API Package..."
-          mvn clean package --settings .maven/settings.xml -DskipTests
+      # - name: Build Package API
+      #   run: |
+      #     echo "🏗️ Building API Package..."
+      #     mvn clean package --settings .maven/settings.xml -DskipTests
 
-      - name: Inspect packaged JAR
-        run: |
-          echo "🔎 Inspecting JAR content..."
-          unzip -l target/*.jar | grep props/
+      # - name: Inspect packaged JAR
+      #   run: |
+      #     echo "🔎 Inspecting JAR content..."
+      #     unzip -l target/*.jar | grep props/
 
-      - name: Show properties inside JAR
-        run: |
-          jar xf target/*.jar props/
-          for f in props/*.yaml; do
-            echo "------ $f ------"
-            head -n 20 "$f"
-          done
+      # - name: Show properties inside JAR
+      #   run: |
+      #     jar xf target/*.jar props/
+      #     for f in props/*.yaml; do
+      #       echo "------ $f ------"
+      #       head -n 20 "$f"
+      #     done
 
       - name: Extract version from pom.xml
         id: extract_version
@@ -154,9 +154,8 @@ jobs:
 
       - name: Deploy to CloudHub 2.0
         run: |
-          echo "🚀 Deploying API ${API_NAME} to CloudHub using local JAR"
-          mvn mule:deploy --settings .maven/settings.xml \
-            -DmuleDeploy \
+          mvn clean package --settings .maven/settings.xml -DskipTests
+          mvn mule:deploy --settings .maven/settings.xml -DmuleDeploy \
             -Dapp.name=${API_NAME} \
             -Denv=${ENV} \
             -Dtarget=${TARGET} \
@@ -165,11 +164,8 @@ jobs:
             -DanypointClientId=${ANYPOINT_CLIENT_ID} \
             -DanypointClientSecret=${ANYPOINT_CLIENT_SECRET} \
             -Dmule.key=${MULE_KEY} \
-            -Dgit.username=${GIT_ORG} \
             -Dworkers=${WORKERS} \
-            -Dvirtual.cores=${VCORES} \
-            -Dpat.token=${PAT_TOKEN} \
-            -Dapplication=target/${APP_NAME}-${VERSION}-mule-application.jar
+            -Dvirtual.cores=${VCORES}
 
       - name: Check deployment success
         if: steps.deploy.outcome == 'success'
