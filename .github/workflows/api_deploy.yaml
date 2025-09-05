@@ -129,11 +129,13 @@ jobs:
 
       - name: Deploy to CloudHub 2.0
         run: |
-           mvn mule:deploy --settings .maven/settings.xml -DmuleDeploy \
+          mvn mule:deploy --settings .maven/settings.xml -DmuleDeploy \
             -Dmule.artifact=target/${APP_NAME}-${VERSION}-mule-application.jar \
             -Dapp.name=${API_NAME} \
             -Denv=${ENV} \
             -Dtarget=${TARGET} \
+            -Dclient.id="${CONNECTEDAPP_CLIENT_ID}" \
+            -Dclient.secret="${CONNECTEDAPP_CLIENT_SECRET}" \
             -DanypointClientId=${ANYPOINT_CLIENT_ID} \
             -DanypointClientSecret=${ANYPOINT_CLIENT_SECRET} \
             -Dmule.key=${MULE_KEY} \
