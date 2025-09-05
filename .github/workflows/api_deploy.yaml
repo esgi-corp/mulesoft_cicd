@@ -130,7 +130,7 @@ jobs:
 
       - name: Deploy to CloudHub 2.0
         run: |
-          mvn deploy --settings .maven/settings.xml -DmuleDeploy \
+          mvn -U -B package mule:deploy --settings .maven/settings.xml \
             -Dapp.name=${API_NAME} \
             -Denv=${ENV} \
             -Dtarget=${TARGET} \
