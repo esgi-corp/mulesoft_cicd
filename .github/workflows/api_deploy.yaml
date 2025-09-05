@@ -124,7 +124,7 @@ jobs:
           ORG_ID="b1c16c15-55a4-4b53-82a0-3cda1e356271"
           GROUP_ID="$ORG_ID"
           ASSET_ID="${APP_NAME}"
-          EXCHANGE_API="https://eu1.anypoint.mulesoft.com/exchange/api/v2/assets/${GROUP_ID}/${ASSET_ID}/${VERSION}"
+          EXCHANGE_API="https://eu1.anypoint.mulesoft.com/exchange/api/v2/assets/${GROUP_ID}/${ASSET_ID}/versions/${VERSION}"
 
           echo "🔍 Checking if asset exists in Exchange: $EXCHANGE_API"
 
