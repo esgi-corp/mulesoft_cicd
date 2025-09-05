@@ -116,37 +116,50 @@ jobs:
       #         -Dgit.username=${GIT_ORG} \
       #         -Dpat.token=${PAT_TOKEN}
 
-      - name: Publish asset to Exchange (with version check)
+      - name: Publish asset to Exchange (force overwrite if version exists)
         run: |
-          echo "📦 Preparing to publish asset to Exchange..."
+          echo "📦 Checking if asset exists on Exchange..."
 
-          # Infos Exchange
-          ORG_ID="b1c16c15-55a4-4b53-82a0-3cda1e356271"
-          GROUP_ID="$ORG_ID"
+          GROUP_ID=$(grep -m 1 '<groupId>' pom.xml | sed -E 's/.*<groupId>([^<]+)<\/groupId>.*/\1/')
+          echo "GROUP_ID=$GROUP_ID" >> $GITHUB_ENV
+
+          GROUP_ID="$GROUP_ID"
           ASSET_ID="${APP_NAME}"
-          EXCHANGE_API="https://eu1.anypoint.mulesoft.com/exchange/api/v2/assets/${GROUP_ID}/${ASSET_ID}/versions/${VERSION}"
+          EXCHANGE_URL="https://eu1.anypoint.mulesoft.com/exchange/api/v2/assets/$GROUP_ID/$ASSET_ID/$VERSION"
 
-          echo "🔍 Checking if asset exists in Exchange: $EXCHANGE_API"
+          echo "🔍 Checking asset: $ASSET_ID:$VERSION"
 
-          # Appel API pour voir si la version existe
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -u "${CONNECTEDAPP_CLIENT_ID}:${CONNECTEDAPP_CLIENT_SECRET}" \
-            -X GET "$EXCHANGE_API")
+          # Step 1: Get bearer token
+          TOKEN=$(curl -s -X POST https://eu1.anypoint.mulesoft.com/accounts/api/v2/oauth2/token \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "grant_type=client_credentials" \
+            -d "client_id=$CONNECTEDAPP_CLIENT_ID" \
+            -d "client_secret=$CONNECTEDAPP_CLIENT_SECRET" | jq -r '.access_token')
 
-          if [ "$STATUS" = "200" ]; then
-            echo "⚠️ Asset version $VERSION already exists on Exchange. Deleting..."
-            curl -s -u "${CONNECTEDAPP_CLIENT_ID}:${CONNECTEDAPP_CLIENT_SECRET}" \
-              -X DELETE "$EXCHANGE_API" || true
-            echo "🗑️ Asset deleted from Exchange."
-          else
-            echo "✅ No existing asset with version $VERSION on Exchange. Safe to publish."
+          if [ -z "$TOKEN" ] || [ "$TOKEN" == "null" ]; then
+            echo "❌ Failed to retrieve access token"
+            exit 1
           fi
 
+          # Step 2: Check if asset exists
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $TOKEN" "$EXCHANGE_URL")
+
+          if [ "$STATUS" -eq 200 ]; then
+            echo "⚠️ Asset $ASSET_ID:$VERSION already exists on Exchange."
+            echo "🗑️ Deleting old version before republishing..."
+            curl -s -X DELETE "$EXCHANGE_URL" -H "Authorization: Bearer $TOKEN"
+          else
+            echo "✅ No existing asset with version $VERSION. Safe to publish."
+          fi
+
+          # Step 3: Publish the JAR again
           echo "📦 Publishing to Exchange..."
           mvn clean deploy --settings .maven/settings.xml -DskipTests \
             -Dclient.id="$CONNECTEDAPP_CLIENT_ID" \
             -Dclient.secret="$CONNECTEDAPP_CLIENT_SECRET" \
             -Dgit.username=${GIT_ORG} \
             -Dpat.token=${PAT_TOKEN}
+
 
       - name: Select mule key based on env deployment
         run: |
