@@ -80,7 +80,6 @@ jobs:
           echo "API_NAME=${APP_NAME}-${ENV}" >> $GITHUB_ENV
 
       - name: Inject all properties into API package
-        if: inputs.ENV == 'sandbox'
         run: |
           echo "📥 Injecting ALL properties into API package"
           mkdir -p src/main/resources/props
