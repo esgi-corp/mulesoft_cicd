@@ -90,26 +90,63 @@ jobs:
           # Nettoyer le répertoire temporaire
           rm -rf properties-repo
 
-      - name: Publish asset to Github
-        if: inputs.ENV == 'sandbox'
+      - name: Extract version from pom.xml
+        id: extract_version
         run: |
-          echo "📦 Publishing to Github..."
-            mvn clean deploy --settings .maven/settings.xml -DskipTests \
-              -DaltDeploymentRepository=github-mule-assets::default::https://maven.pkg.github.com/esgi-corp/mule-assets \
-              -Dclient.id="$CONNECTEDAPP_CLIENT_ID" \
-              -Dclient.secret="$CONNECTEDAPP_CLIENT_SECRET" \
-              -Dgit.username=${GIT_ORG} \
-              -Dpat.token=${PAT_TOKEN}
+          VERSION=$(grep -m 1 '<version>' pom.xml | sed -E 's/.*<version>([^<]+)<\/version>.*/\1/')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Publish asset to Exchange
-        if: inputs.ENV == 'sandbox'
+      # - name: Publish asset to Github
+      #   if: inputs.ENV == 'sandbox'
+      #   run: |
+      #     echo "📦 Publishing to Github..."
+      #       mvn clean deploy --settings .maven/settings.xml -DskipTests \
+      #         -DaltDeploymentRepository=github-mule-assets::default::https://maven.pkg.github.com/esgi-corp/mule-assets \
+      #         -Dclient.id="$CONNECTEDAPP_CLIENT_ID" \
+      #         -Dclient.secret="$CONNECTEDAPP_CLIENT_SECRET" \
+      #         -Dgit.username=${GIT_ORG} \
+      #         -Dpat.token=${PAT_TOKEN}
+
+      # - name: Publish asset to Exchange
+      #   run: |
+      #     echo "📦 Publishing to Exchange..."
+      #       mvn clean deploy --settings .maven/settings.xml -DskipTests \
+      #         -Dclient.id="$CONNECTEDAPP_CLIENT_ID" \
+      #         -Dclient.secret="$CONNECTEDAPP_CLIENT_SECRET" \
+      #         -Dgit.username=${GIT_ORG} \
+      #         -Dpat.token=${PAT_TOKEN}
+
+      - name: Publish asset to Exchange (with version check)
         run: |
+          echo "📦 Preparing to publish asset to Exchange..."
+
+          # Infos Exchange
+          ORG_ID="b1c16c15-55a4-4b53-82a0-3cda1e356271"
+          GROUP_ID="$ORG_ID"
+          ASSET_ID="${APP_NAME}"
+          EXCHANGE_API="https://eu1.anypoint.mulesoft.com/exchange/api/v2/assets/${GROUP_ID}/${ASSET_ID}/${VERSION}"
+
+          echo "🔍 Checking if asset exists in Exchange: $EXCHANGE_API"
+
+          # Appel API pour voir si la version existe
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -u "${CONNECTEDAPP_CLIENT_ID}:${CONNECTEDAPP_CLIENT_SECRET}" \
+            -X GET "$EXCHANGE_API")
+
+          if [ "$STATUS" = "200" ]; then
+            echo "⚠️ Asset version $VERSION already exists on Exchange. Deleting..."
+            curl -s -u "${CONNECTEDAPP_CLIENT_ID}:${CONNECTEDAPP_CLIENT_SECRET}" \
+              -X DELETE "$EXCHANGE_API" || true
+            echo "🗑️ Asset deleted from Exchange."
+          else
+            echo "✅ No existing asset with version $VERSION on Exchange. Safe to publish."
+          fi
+
           echo "📦 Publishing to Exchange..."
-            mvn clean deploy --settings .maven/settings.xml -DskipTests \
-              -Dclient.id="$CONNECTEDAPP_CLIENT_ID" \
-              -Dclient.secret="$CONNECTEDAPP_CLIENT_SECRET" \
-              -Dgit.username=${GIT_ORG} \
-              -Dpat.token=${PAT_TOKEN}
+          mvn clean deploy --settings .maven/settings.xml -DskipTests \
+            -Dclient.id="$CONNECTEDAPP_CLIENT_ID" \
+            -Dclient.secret="$CONNECTEDAPP_CLIENT_SECRET" \
+            -Dgit.username=${GIT_ORG} \
+            -Dpat.token=${PAT_TOKEN}
 
       - name: Select mule key based on env deployment
         run: |
@@ -138,12 +175,6 @@ jobs:
       - name: Check deployment success
         if: steps.deploy.outcome == 'success'
         run: echo "✅ Deployment succeeded."
-
-      - name: Extract version from pom.xml
-        id: extract_version
-        run: |
-          VERSION=$(grep -m 1 '<version>' pom.xml | sed -E 's/.*<version>([^<]+)<\/version>.*/\1/')
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Create and push tag
         if: inputs.env == 'sandbox'
