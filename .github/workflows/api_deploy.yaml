@@ -80,6 +80,7 @@ jobs:
           echo "API_NAME=${APP_NAME}-${ENV}" >> $GITHUB_ENV
 
       - name: Inject all properties into API package
+        if: inputs.ENV == 'sandbox'
         run: |
           echo "📥 Injecting ALL properties into API package"
           mkdir -p src/main/resources/props
@@ -97,7 +98,7 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Publish asset to Github
-        if: inputs.ENV == 'prd'
+        if: inputs.ENV == 'sandbox'
         run: |
           echo "📦 Publishing to Github..."
             mvn clean deploy --settings .maven/settings.xml -DskipTests \
@@ -108,10 +109,10 @@ jobs:
               -Dpat.token=${PAT_TOKEN}
 
       - name: Publish asset to Exchange
-        if: inputs.ENV == 'prd'
+        if: inputs.ENV == 'sandbox'
         run: |
           echo "📦 Publishing to Exchange..."
-            mvn clean deploy --settings .maven/settings.xml -DskipTests \
+            mvn deploy --settings .maven/settings.xml -DskipTests \
               -Dclient.id="$CONNECTEDAPP_CLIENT_ID" \
               -Dclient.secret="$CONNECTEDAPP_CLIENT_SECRET" \
               -Dgit.username=${GIT_ORG} \
@@ -129,8 +130,7 @@ jobs:
 
       - name: Deploy to CloudHub 2.0
         run: |
-          mvn mule:deploy --settings .maven/settings.xml -DmuleDeploy \
-            -Dmule.artifact=target/${APP_NAME}-${VERSION}-mule-application.jar \
+          mvn deploy --settings .maven/settings.xml -DmuleDeploy \
             -Dapp.name=${API_NAME} \
             -Denv=${ENV} \
             -Dtarget=${TARGET} \
