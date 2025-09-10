@@ -4,27 +4,31 @@ on:
   workflow_call:
     inputs:
       env:
-        description: "Environnement de déploiement"
+        description: "Deployment environment"
         required: true
         type: string
       branch:
-        description: "Nom de la branche à déployer"
+        description: "Branch to deploy"
+        required: false
+        type: string
+      jira_ticket:
+        description: "Jira ticket number"
         required: false
         type: string
       workers:
-        description: "Nombre de replicas"
+        description: "Number of replicas"
         required: false
         type: string
       vcores:
-        description: "Nombre de vcores"
+        description: "Number of vcores"
         required: false
         type: string
       app_name:
-        description: "Nom de l'API"
+        description: "API name"
         required: false
         type: string
       repo_props_name:
-        description: "Nom du repository des propriétés"
+        description: "Properties repository name"
         required: false
         type: string
 
@@ -159,6 +163,18 @@ jobs:
             git tag $TAG_NAME
             git push origin $TAG_NAME
           fi
+
+      - name: Send deployment info to Jira
+        if: inputs.jira_ticket != '' && inputs.env != 'sandbox'
+        uses: atlassian/gajira-comment@v3
+        with:
+          issue: ${{ inputs.jira_ticket }}
+          comment: |
+            🚀 Deployment of **${TAG_NAME}** to **${ENV}** environment was successful.
+        # env:
+        #   JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+        #   JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+        #   JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 
       - name: Update branch main to deployed tag
         if: inputs.env == 'prd'
