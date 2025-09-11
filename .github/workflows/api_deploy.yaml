@@ -131,25 +131,8 @@ jobs:
             echo "MULE_KEY=${SANDBOX_MULE_KEY}" >> $GITHUB_ENV
           fi
 
-      - name: Login to Jira Platform
-        if: inputs.jira_ticket != '' && inputs.env != 'sandbox'
-        uses: atlassian/gajira-login@master
-        env:
-            JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
-            JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
-            JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
-
-      - name: Send deployment info to Jira
-        if: inputs.jira_ticket != '' && inputs.env != 'sandbox'
-        uses: atlassian/gajira-comment@v3
-        with:
-          issue: ${{ inputs.jira_ticket }}
-          comment: |
-            🚀 Deployment of ${{ github.ref_name }} to ${{ inputs.env }} environment was successful.
-
       - name: Deploy to CloudHub 2.0
         run: |
-          exit 1 
           mvn -U -B package mule:deploy --settings .maven/settings.xml \
             -Dapp.name=${API_NAME} \
             -Denv=${ENV} \
@@ -180,6 +163,22 @@ jobs:
             git tag $TAG_NAME
             git push origin $TAG_NAME
           fi
+
+      - name: Login to Jira Platform
+        if: inputs.jira_ticket != '' && inputs.env != 'sandbox'
+        uses: atlassian/gajira-login@master
+        env:
+            JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+            JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+            JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+
+      - name: Send deployment info to Jira
+        if: inputs.jira_ticket != '' && inputs.env != 'sandbox'
+        uses: atlassian/gajira-comment@v3
+        with:
+          issue: ${{ inputs.jira_ticket }}
+          comment: |
+            🚀 Deployment of tag ${{ github.ref_name }} to ${{ inputs.env }} environment was successful.
 
       - name: Update branch main to deployed tag
         if: inputs.env == 'prd'
