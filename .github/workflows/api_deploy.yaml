@@ -131,6 +131,23 @@ jobs:
             echo "MULE_KEY=${SANDBOX_MULE_KEY}" >> $GITHUB_ENV
           fi
 
+      - name: Login to Jira Platform
+        if: inputs.jira_ticket != '' && inputs.env != 'sandbox'
+        uses: atlassian/gajira-login@master
+        env:
+            JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+            JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+            JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+
+      - name: Send deployment info to Jira
+        if: inputs.jira_ticket != '' && inputs.env != 'sandbox'
+        uses: atlassian/gajira-comment@v3
+        with:
+          issue: ${{ inputs.jira_ticket }}
+          comment: |
+            🚀 Deployment of **${TAG_NAME}** to **${ENV}** environment was successful.
+            exit 1
+
       - name: Deploy to CloudHub 2.0
         run: |
           mvn -U -B package mule:deploy --settings .maven/settings.xml \
